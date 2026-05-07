@@ -35,24 +35,33 @@ function BookPage() {
 
   const serviceLabel = serviceTypes.find((s) => s.id === selectedService)?.label || selectedService;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.name || !form.phone || !form.date || !form.address) return;
 
     const message = `Hello Splendor Cleaning!%0A%0AI'd like to book a *${serviceLabel}* service.%0A%0A*Name:* ${form.name}%0A*Phone:* ${form.phone}%0A*Date:* ${form.date}%0A*Time:* ${form.time || "Flexible"}%0A*Address:* ${form.address}`;
-
     const whatsappUrl = `https://wa.me/2349025871034?text=${message}`;
 
-    const mailSubject = encodeURIComponent(`Booking Request - ${serviceLabel}`);
-    const mailBody = encodeURIComponent(
-      `Hello Splendor Cleaning!\n\nI'd like to book a ${serviceLabel} service.\n\nName: ${form.name}\nPhone: ${form.phone}\nDate: ${form.date}\nTime: ${form.time || "Flexible"}\nAddress: ${form.address}`
-    );
-    const mailUrl = `mailto:splendorcleaningtechnician28@gmail.com?subject=${mailSubject}&body=${mailBody}`;
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...form, serviceLabel }),
+      });
 
-    // Open both email and WhatsApp
-    window.open(whatsappUrl, "_blank");
-    window.location.href = mailUrl;
+      if (!response.ok) {
+        throw new Error('Failed to send email.');
+      }
 
-    setSubmitted(true);
+      // Open WhatsApp
+      window.open(whatsappUrl, "_blank");
+
+      setSubmitted(true);
+    } catch (error) {
+      console.error(error);
+      // Handle error state here, maybe show a toast notification
+    }
   };
 
   if (submitted) {
