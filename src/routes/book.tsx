@@ -51,17 +51,16 @@ function BookPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send email.');
+        // Even if email fails, we can still proceed with WhatsApp
+        console.error('Failed to send email.');
       }
-
-      // Open WhatsApp
-      window.open(whatsappUrl, "_blank");
-
-      setSubmitted(true);
     } catch (error) {
-      console.error(error);
-      // Handle error state here, maybe show a toast notification
+      console.error('Error sending email:', error);
     }
+
+    // Open WhatsApp and mark as submitted
+    window.open(whatsappUrl, "_blank");
+    setSubmitted(true);
   };
 
   if (submitted) {
